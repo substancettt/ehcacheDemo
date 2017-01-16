@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="ehcache.xsd"
+         updateCheck="true" monitoring="autodetect"
+         dynamicConfig="true">
+    
+    <diskStore path="java.io.tmpdir"/>
+ <!--
+    <transactionManagerLookup class="net.sf.ehcache.transaction.manager.DefaultTransactionManagerLookup"  properties="jndiName=java:/TransactionManager" propertySeparator=";"/>
+    
+    <cacheManagerEventListenerFactory class="" properties=""/>
+  -->    
+    <!-- 集群配置 --> 
+    <cacheManagerPeerProviderFactory
+            class="net.sf.ehcache.distribution.RMICacheManagerPeerProviderFactory"
+            properties="peerDiscovery=manual,rmiUrls=//localhost:4001/rep|//localhost:4003/rep"/>
+            
+    <cacheManagerPeerListenerFactory class="net.sf.ehcache.distribution.RMICacheManagerPeerListenerFactory" 
+                                     properties="hostName=localhost, port=4002,socketTimeoutMillis=2000"/>
+    
+
+	     <defaultCache maxEntriesLocalHeap="10000"
+                       eternal="false"
+                       timeToIdleSeconds="120"
+                       timeToLiveSeconds="120"
+                       diskSpoolBufferSizeMB="30"
+                       maxEntriesLocalDisk="10000000"
+                       diskExpiryThreadIntervalSeconds="120"
+                       memoryStoreEvictionPolicy="LRU">
+        <persistence strategy="localTempSwap"/>
+    </defaultCache>
+
+    <cache name="rep"
+           maxEntriesLocalHeap="10000"
+           maxEntriesLocalDisk="0"
+           eternal="false"
+           diskSpoolBufferSizeMB="20"
+           timeToIdleSeconds="120"
+           timeToLiveSeconds="0"
+           memoryStoreEvictionPolicy="LFU"
+           transactionalMode="off" 
+           >
+        <cacheEventListenerFactory class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"/>
+        <bootstrapCacheLoaderFactory class="net.sf.ehcache.distribution.RMIBootstrapCacheLoaderFactory"/>
+        <persistence strategy="localTempSwap"/>
+    </cache>
+
+</ehcache>
